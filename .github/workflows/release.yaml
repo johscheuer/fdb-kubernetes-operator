@@ -15,7 +15,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: wangyoucao577/go-release-action@v1.11
         with:
-          pre_command: curl --fail https://www.foundationdb.org/downloads/6.2.28/ubuntu/installers/foundationdb-clients_6.2.28-1_amd64.deb -o fdb.deb && sudo dpkg -i fdb.deb
+          pre_command: bash -c "mkdir /usr/local/share/ca-certificates && cp ./foundationdb-kubernetes-sidecar/files/GeoTrust_Global_CA.pem /usr/local/share/ca-certificates/GeoTrust_Global_CA.crt && update-ca-certificates && curl --fail https://www.foundationdb.org/downloads/6.2.28/ubuntu/installers/foundationdb-clients_6.2.28-1_amd64.deb -o fdb.deb && sudo dpkg -i fdb.deb"
           github_token: ${{ secrets.GITHUB_TOKEN }}
           goos: ${{ matrix.goos }}
           goarch: ${{ matrix.goarch }}
