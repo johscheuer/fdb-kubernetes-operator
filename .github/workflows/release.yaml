@@ -5,6 +5,25 @@ on:
     - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
 
 jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ teps.create_release.outputs.upload_url }}
+    steps:
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          # Should use body_path + auto generate release info
+          body: |
+            Changes in this Release
+            - More awesomeness !
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
   releases-linux:
     runs-on: ubuntu-latest
     steps:
@@ -20,23 +39,13 @@ jobs:
           sudo dpkg -i fdb.deb
       - name: Build
         run: make plugin
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
-          draft: false
-          prerelease: false
       - name: Upload Release Asset
         id: upload-release-asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
           asset_path: ./bin/kubectl-fdb
           asset_name: kubectl-fdb-linux-amd64
           asset_content_type: application/octet-stream
@@ -56,24 +65,17 @@ jobs:
       - name: Build
         # TODO should we add a checksum and a tar file?
         run: make plugin
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
-          draft: false
-          prerelease: false
       - name: Upload Release Asset
         id: upload-release-asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          upload_url: ${{ needs.create-release.outputs.upload_url }}s
           asset_path: ./bin/kubectl-fdb
           asset_name: kubectl-fdb-darwin-amd64
           asset_content_type: application/octet-stream
       # TODO Windows?
+
+
+--> https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idoutputs
