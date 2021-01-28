@@ -1,7 +1,8 @@
 name: Release kubectl plugin
 on:
-  release:
-    types: [created]
+  push:
+    tags:
+    - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
 
 jobs:
   releases-linux:
