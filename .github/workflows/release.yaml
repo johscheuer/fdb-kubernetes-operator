@@ -32,7 +32,7 @@ jobs:
           #- windows-latest
           - ubuntu-latest
           - macOS-latest
-    needs: reate-release
+    needs: create-release
     steps:
       - uses: actions/checkout@v2
       - name: Set up Go 1.15
@@ -47,7 +47,7 @@ jobs:
           if [[ $(uname -s) == Darwin ]];then
               curl --fail "https://www.foundationdb.org/downloads/${FDB_VER}/macOS/installers/FoundationDB-${FDB_VER}.pkg" -o fdb.pkg
               sudo installer -allowUntrusted -verbose -pkg ./fdb.pkg -target /
-          else
+          elses
               curl --fail "https://www.foundationdb.org/downloads/${FDB_VER}/ubuntu/installers/foundationdb-clients_${FDB_VER}-1_amd64.deb" -o fdb.deb
               sudo dpkg -i fdb.deb
           fi
