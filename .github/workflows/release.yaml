@@ -76,6 +76,3 @@ jobs:
           asset_name: kubectl-fdb-darwin-amd64
           asset_content_type: application/octet-stream
       # TODO Windows?
-
-
---> https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idoutputs
