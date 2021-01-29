@@ -118,5 +118,4 @@ jobs:
           # GitHub packages but GHCR doesn't support the workflow credentials and is only in public beta :(
           outputs: type=docker
       - name: Push the image with docker
-        id: get_tag
         run: docker push docker.pkg.github.com/${{ github.repository }}/${{ matrix.image }}:${{ steps.get_tag.outputs.TAG }}
