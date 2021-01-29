@@ -71,3 +71,34 @@ jobs:
           asset_path: ./bin/kubectl-fdb
           asset_name: kubectl-fdb-${{ matrix.os }}-amd64
           asset_content_type: application/octet-stream
+  push_images:
+    name: Push Docker image to GitHub Packages
+    needs: create-release
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        image:
+          - fdb-kubernetes-operator
+          - foundationdb-kubernetes-sidecar
+          - fdb-data-loader
+        include:
+          - image: fdb-kubernetes-operator
+            context: ./
+          - image: foundationdb-kubernetes-sidecar
+            context: ./foundationdb-kubernetes-sidecar
+          - image: fdb-data-loader
+            context: ./sample-apps/data-loader
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+      - name: Push to GitHub Packages
+        uses: docker/build-push-action@v1
+        with:
+          username: ${{ github.actor }}
+          context: ${{ matrix.context }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: docker.pkg.github.com
+          # todo adjust to FoundationDB
+          repository: ${{ github.repository }}/${{ matrix.image }}
+          tags: ${{ github.ref }}
+          push: true
