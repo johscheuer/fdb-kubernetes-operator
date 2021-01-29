@@ -110,6 +110,5 @@ jobs:
           context: ${{ matrix.context }}
           # todo adjust to FoundationDB
           # See: https://github.community/t/how-to-get-just-the-tag-name/16241 why we use this weird step
-          tags:
-          ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}:${{ steps.get_tag.outputs.TAG }}
+          tags: ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}:${{ steps.get_tag.outputs.TAG }}
           push: true
