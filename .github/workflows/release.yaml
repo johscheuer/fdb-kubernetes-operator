@@ -114,5 +114,9 @@ jobs:
           # ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}:${{ steps.get_tag.outputs.TAG }}
           tags: docker.pkg.github.com/${{ github.repository }}/${{ matrix.image }}:${{ steps.get_tag.outputs.TAG }}
           #push: true
-          # Workaround
-          outputs: type=image,push=true
+          # Workaround: otherwise we have a multi-arch image which is not supported by the deprecated
+          # GitHub packages but GHCR doesn't support the workflow credentials and is only in public beta :(
+          outputs: type=docker
+      - name: Push the image with docker
+        id: get_tag
+        run: docker push docker.pkg.github.com/${{ github.repository }}/${{ matrix.image }}:${{ steps.get_tag.outputs.TAG }}
