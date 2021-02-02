@@ -11,6 +11,7 @@ jobs:
       upload_url: ${{ steps.create_release.outputs.upload_url }}
       tag: ${{ steps.get_tag.outputs.TAG  }}
     steps:
+      - uses: actions/checkout@v2
       - name: Get the tag without ref
         id: get_tag
         run: echo ::set-output name=TAG::${GITHUB_REF/refs\/tags\//}
