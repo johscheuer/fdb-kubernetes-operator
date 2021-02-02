@@ -59,7 +59,7 @@ jobs:
               curl --fail "https://www.foundationdb.org/downloads/${FDB_VER}/ubuntu/installers/foundationdb-clients_${FDB_VER}-1_amd64.deb" -o fdb.deb
               sudo dpkg -i fdb.deb
           fi
-          tar cfvz ./bin/kubectl-fdb.tar.gz ./bin/kubectl-fdb
+          gzip ./bin/kubectl-fdb
       # - name: Get FDB client (windows-only)
       #   if: runner.os == 'Windows'
       #   shell: powershell
@@ -77,6 +77,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create-release.outputs.upload_url }}
-          asset_path: ./bin/kubectl-fdb.tar.gz
-          asset_name: kubectl-fdb-${{ needs.create-release.outputs.tag }}-${{ steps.set_package_name.outputs.package_name }}.tar.gz
+          asset_path: ./bin/kubectl-fdb.gz
+          asset_name: kubectl-fdb-${{ needs.create-release.outputs.tag }}-${{ steps.set_package_name.outputs.package_name }}.gz
           asset_content_type: application/gzip
