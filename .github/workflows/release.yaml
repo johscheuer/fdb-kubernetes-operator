@@ -10,6 +10,8 @@ jobs:
     outputs:
       upload_url: ${{ steps.create_release.outputs.upload_url }}
     steps:
+      - name: Ensure changelog file exists
+        run: touch ./docs/changelog/${{ github.ref }}.md
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -17,7 +19,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.ref }}
-          body_path: ./docs/changelog/{{ github.ref }}.md
+          body_path: ./docs/changelog/${{ github.ref }}.md
           release_name: Release ${{ github.ref }}
           draft: false
           prerelease: false
