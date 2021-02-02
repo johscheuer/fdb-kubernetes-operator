@@ -24,7 +24,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.ref }}
-          body_path: ./docs/changelog/${{ github.ref }}.md
+          body_path: ./docs/changelog/${{ steps.get_tag.outputs.TAG }}.md
           release_name: Release ${{ github.ref }}
           draft: false
           prerelease: false
