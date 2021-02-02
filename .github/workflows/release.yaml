@@ -9,9 +9,13 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       upload_url: ${{ steps.create_release.outputs.upload_url }}
+      tag: ${{ steps.get_tag.outputs.TAG  }}
     steps:
+      - name: Get the tag without ref
+        id: get_tag
+        run: echo ::set-output name=TAG::${GITHUB_REF/refs\/tags\//}
       - name: Ensure changelog file exists
-        run: touch ./docs/changelog/${{ github.ref }}.md
+        run: touch ./docs/changelog/${{ steps.get_tag.outputs.TAG }}.md
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -34,12 +38,9 @@ jobs:
     needs: create-release
     steps:
       - uses: actions/checkout@v2
-      - name: Get the version
-        id: get_tag
-        run: echo ::set-output name=TAG::${GITHUB_REF/refs\/tags\//}
       - name: Set package name
         id: set_package_name
-        run: echo ::set-output name=PACKAGE_NAME::kubectl-fdb-${{ steps.get_tag.outputs.TAG }}-${RUNNER_OS,,}.tar.gz
+        run: echo ::set-output name=package_name::kubectl-fdb-${{ needs.create-release.outputs.tag }}-${RUNNER_OS,,}.tar.gz
       - name: Set up Go 1.15
         uses: actions/setup-go@v1
         with:
@@ -76,5 +77,5 @@ jobs:
         with:
           upload_url: ${{ needs.create-release.outputs.upload_url }}
           asset_path: ./bin/kubectl-fdb.tar.gz
-          asset_name: kubectl-fdb-${{ steps.get_tag.outputs.TAG }}-${{ steps.set_package_name.outputs.set_package_name }}.tar.gz
+          asset_name: kubectl-fdb-${{ needs.create-release.outputs.tag }}-${{ steps.set_package_name.outputs.package_name }}.tar.gz
           asset_content_type: application/gzip
