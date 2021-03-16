@@ -93,7 +93,7 @@ jobs:
     - name: Get dependencies
       if: steps.dependency_cache.outputs.cache-hit != 'true'
       env:
-        KUBEBUILDER_VER: "2.2.0"
+        KUBEBUILDER_VER: "2.3.2"
         KUSTOMIZE_VER: "v3.9.4"
         TEST_RACE_CONDITIONS: "1"
         FDB_VER: "6.2.29"
