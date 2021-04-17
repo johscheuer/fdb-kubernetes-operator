@@ -60,7 +60,7 @@ jobs:
               sudo dpkg -i fdb.deb
           fi
           # Test if the binary actually works!
-          ./kubectl-fdb version --client-only
+          ./bin/kubectl-fdb version --client-only
       # - name: Get FDB client (windows-only)
       #   if: runner.os == 'Windows'
       #   shell: powershell
