@@ -73,7 +73,9 @@ jobs:
       - name: Test binary
         run: ./bin/kubectl-fdb version --client-only
       - name: Create sha256 for assert
-        run: sha256sum ./bin/kubectl-fdb.tar.gz > ./bin/${{ steps.set_package_name.outputs.package_name }}.sha256
+        run: |
+          cp ./bin/kubectl-fdb.tar.gz ${{ steps.set_package_name.outputs.package_name }}
+          sha256sum ${{ steps.set_package_name.outputs.package_name }} > ./bin/${{ steps.set_package_name.outputs.package_name }}.sha256
       - name: Upload Release asset
         uses: actions/upload-release-asset@v1
         env:
