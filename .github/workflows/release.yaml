@@ -51,6 +51,7 @@ jobs:
         env:
           FDB_VER: "6.2.29"
         run: |
+          go env
           go get -v -t -d ./...
           if [[ "${RUNNER_OS}" == "macOS" ]];then
               curl --fail "https://www.foundationdb.org/downloads/${FDB_VER}/macOS/installers/FoundationDB-${FDB_VER}.pkg" -o fdb.pkg
