@@ -51,7 +51,6 @@ jobs:
         env:
           FDB_VER: "6.2.29"
         run: |
-          go env
           go get -v -t -d ./...
           if [[ "${RUNNER_OS}" == "macOS" ]];then
               curl --fail "https://www.foundationdb.org/downloads/${FDB_VER}/macOS/installers/FoundationDB-${FDB_VER}.pkg" -o fdb.pkg
@@ -60,6 +59,8 @@ jobs:
               curl --fail "https://www.foundationdb.org/downloads/${FDB_VER}/ubuntu/installers/foundationdb-clients_${FDB_VER}-1_amd64.deb" -o fdb.deb
               sudo dpkg -i fdb.deb
           fi
+          # Test if the binary actually works!
+          ./kubectl-fdb version --client-only
       # - name: Get FDB client (windows-only)
       #   if: runner.os == 'Windows'
       #   shell: powershell
@@ -69,6 +70,10 @@ jobs:
       #     go get -v -t -d ./...
       - name: Build
         run: TAG=${{ needs.create-release.outputs.tag }} make plugin package
+      - name: Create sha256 for assert
+        run: echo "${{ hashFiles('./bin/kubectl-fdb.tar.gz') }}" > ./bin/${{ steps.set_package_name.outputs.package_name }}.sha256
+      - name: Create sha256 for assert with sha256sum
+        run: sha256sum ./bin/kubectl-fdb.tar.gz
       - name: Upload Release asset
         uses: actions/upload-release-asset@v1
         env:
@@ -78,8 +83,8 @@ jobs:
           asset_path: ./bin/kubectl-fdb.tar.gz
           asset_name: ${{ steps.set_package_name.outputs.package_name }}
           asset_content_type: application/gzip
-      - name: Create sha256 for assert
-        run: echo "${{ hashFiles('./bin/kubectl-fdb.tar.gz') }}" > ./bin/${{ steps.set_package_name.outputs.package_name }}.sha256
+      - name: Create sha256 for assert with sha256sum after
+        run: sha256sum ./bin/kubectl-fdb.tar.gz
       - name: Upload sha256 for asset
         uses: actions/upload-release-asset@v1
         env:
