@@ -59,8 +59,6 @@ jobs:
               curl --fail "https://www.foundationdb.org/downloads/${FDB_VER}/ubuntu/installers/foundationdb-clients_${FDB_VER}-1_amd64.deb" -o fdb.deb
               sudo dpkg -i fdb.deb
           fi
-          # Test if the binary actually works!
-          ./bin/kubectl-fdb version --client-only
       # - name: Get FDB client (windows-only)
       #   if: runner.os == 'Windows'
       #   shell: powershell
@@ -70,6 +68,8 @@ jobs:
       #     go get -v -t -d ./...
       - name: Build
         run: TAG=${{ needs.create-release.outputs.tag }} make plugin package
+      - name: Test binary
+        run: ./bin/kubectl-fdb version --client-only
       - name: Create sha256 for assert
         run: echo "${{ hashFiles('./bin/kubectl-fdb.tar.gz') }}" > ./bin/${{ steps.set_package_name.outputs.package_name }}.sha256
       - name: Create sha256 for assert with sha256sum
