@@ -186,9 +186,11 @@ func (client *cliAdminClient) runCommand(command cliCommand) (string, error) {
 	} else {
 		args = append(args, "--logdir", os.Getenv("FDB_NETWORK_OPTION_TRACE_ENABLE"))
 	}
+
 	timeoutContext, cancelFunction := context.WithTimeout(context.Background(), time.Second*time.Duration(hardTimeout))
 	defer cancelFunction()
 	execCommand := exec.CommandContext(timeoutContext, binary, args...)
+	execCommand.Env = os.Environ()
 
 	log.Info("Running command", "namespace", client.Cluster.Namespace, "cluster", client.Cluster.Name, "path", execCommand.Path, "args", execCommand.Args)
 
