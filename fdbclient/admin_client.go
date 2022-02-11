@@ -334,60 +334,51 @@ func (client *cliAdminClient) GetExclusions() ([]fdbtypes.ProcessAddress, error)
 // The list returned by this method will be the addresses that are *not*
 // safe to remove.
 func (client *cliAdminClient) CanSafelyRemove(addresses []fdbtypes.ProcessAddress) ([]fdbtypes.ProcessAddress, error) {
-	version, err := fdbtypes.ParseFdbVersion(client.Cluster.Spec.Version)
+	// The general idea is to fetch the cluster status and to check if a process is still serving roles.
+	// If a process still serves roles it's not safe to remove it.
+	status, err := client.GetStatus()
 	if err != nil {
 		return nil, err
 	}
 
-	if version.HasNonBlockingExcludes(client.Cluster.GetUseNonBlockingExcludes()) {
-		output, err := client.runCommand(cliCommand{command: fmt.Sprintf(
-			"exclude no_wait %s",
-			fdbtypes.ProcessAddressesString(addresses, " "),
-		)})
-		if err != nil {
-			return nil, err
-		}
-		exclusionResults := parseExclusionOutput(output)
-		log.Info("Checking exclusion results", "namespace", client.Cluster.Namespace, "cluster", client.Cluster.Name, "addresses", addresses, "results", exclusionResults)
-		remaining := make([]fdbtypes.ProcessAddress, 0, len(addresses))
-		for _, address := range addresses {
-			if exclusionResults[address.String()] != "Success" && exclusionResults[address.String()] != "Missing" {
-				remaining = append(remaining, address)
-			}
+	addressMap := make(map[string]fdbtypes.ProcessAddress, len(addresses))
+	for _, addr := range addresses {
+		addressMap[addr.IPAddress.String()] = addr
+	}
+
+	// Validate if the provided addresses are excluded and doesn't serve any roles.
+	// This is basically the same logic as used internally in FDB.
+	for _, process := range status.Cluster.Processes {
+		if _, ok := addressMap[process.Address.IPAddress.String()]; !ok {
+			continue
 		}
 
-		return remaining, nil
+		// The process is not marked as excluded, it's not safe to remove it.
+		// We could also argue that it's safe to remove a process that is not excluded and doesn't
+		// serve any roles.
+		if process.Excluded {
+			delete(addressMap, process.Address.IPAddress.String())
+			continue
+		}
+
+		// Process is fully excluded and doesn't serve any roles.
+		if len(process.Roles) == 0 {
+			continue
+		}
+
+		delete(addressMap, process.Address.IPAddress.String())
 	}
-	_, err = client.runCommand(cliCommand{command: fmt.Sprintf(
-		"exclude %s",
-		fdbtypes.ProcessAddressesString(addresses, " "),
-	)})
-	return nil, err
+
+	// All items that are still in the map are fully excluded.
+	fullyExcluded := make([]fdbtypes.ProcessAddress, 0, len(addresses))
+	for _, addr := range addressMap {
+		fullyExcluded = append(fullyExcluded, addr)
+	}
+
+	return fullyExcluded, err
 }
 
-// parseExclusionOutput extracts the exclusion status for each address from
-// the output of an exclusion command.
-func parseExclusionOutput(output string) map[string]string {
-	results := make(map[string]string)
-	var regex = regexp.MustCompile(`\s*(\[?[\w.:\]?]+)(\([\w ]*\))?\s*-+(.*)`)
-	matches := regex.FindAllStringSubmatch(output, -1)
-	for _, match := range matches {
-		address := match[1]
-		status := match[len(match)-1]
-		if strings.Contains(status, "Successfully excluded") {
-			results[address] = "Success"
-		} else if strings.Contains(status, "WARNING: Missing from cluster") {
-			results[address] = "Missing"
-		} else if strings.Contains(status, "Exclusion in progress") {
-			results[address] = "In Progress"
-		} else {
-			results[address] = "Unknown"
-		}
-	}
-	return results
-}
-
-// KillInstances restarts processes
+// KillProcesses restarts processes
 func (client *cliAdminClient) KillProcesses(addresses []fdbtypes.ProcessAddress) error {
 	if len(addresses) == 0 {
 		return nil
