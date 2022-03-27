@@ -210,15 +210,15 @@ bin/lint: $(GOLANGCI_LINT) ${GO_SRC}
 snapshot: bin/snapshot
 
 bin/snapshot: ${GO_SRC} $(GORELEASER)
-	goreleaser check
-	goreleaser release --snapshot --rm-dist
+	$(GORELEASER) check
+	$(GORELEASER) release --snapshot --rm-dist
 	@mkdir -p bin
 	@touch $@
 
 release: bin/release
 
 bin/release: ${GO_SRC} $(GORELEASER)
-	goreleaser check
-	goreleaser release --rm-dist
+	$(GORELEASER) check
+	$(GORELEASER) release --rm-dist
 	@mkdir -p bin
 	@touch $@
