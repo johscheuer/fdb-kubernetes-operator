@@ -139,6 +139,7 @@ jobs:
           file: ${{ matrix.file }}
   goreleaser:
     name: Build kubectl-fdb binaries
+    runs-on: ubuntu-latest
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
