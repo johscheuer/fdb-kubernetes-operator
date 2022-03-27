@@ -78,6 +78,7 @@ clean:
 	rm -r bin
 	rm -f $(SAMPLES)
 	rm -f config/rbac/role.yaml
+	rm -rf ./dist/*
 	find . -name "cover.out" -delete
 
 clean-deps:
