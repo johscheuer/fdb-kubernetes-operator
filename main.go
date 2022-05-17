@@ -52,7 +52,6 @@ func main() {
 	fdb.MustAPIVersion(610)
 	operatorOpts := setup.Options{}
 	operatorOpts.BindFlags(flag.CommandLine)
-
 	logOpts := zap.Options{}
 	logOpts.BindFlags(flag.CommandLine)
 	flag.Parse()

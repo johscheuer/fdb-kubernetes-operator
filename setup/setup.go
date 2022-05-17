@@ -29,6 +29,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/apple/foundationdb/bindings/go/src/fdb"
+
 	"github.com/go-logr/logr"
 
 	"github.com/FoundationDB/fdb-kubernetes-operator/api/v1beta2"
@@ -50,22 +52,23 @@ var operatorVersion = "latest"
 
 // Options provides all configuration Options for the operator
 type Options struct {
-	MetricsAddr             string
 	EnableLeaderElection    bool
+	CompressOldFiles        bool
+	PrintVersion            bool
+	CleanUpOldLogFile       bool
+	UseMultipleThreads      bool
 	LeaderElectionID        string
 	LogFile                 string
+	MetricsAddr             string
+	LabelSelector           string
+	WatchNamespace          string
 	CliTimeout              int
-	DeprecationOptions      internal.DeprecationOptions
-	MaxConcurrentReconciles int
-	CleanUpOldLogFile       bool
-	LogFileMinAge           time.Duration
 	LogFileMaxSize          int
 	LogFileMaxAge           int
 	MaxNumberOfOldLogFiles  int
-	CompressOldFiles        bool
-	PrintVersion            bool
-	LabelSelector           string
-	WatchNamespace          string
+	MaxConcurrentReconciles int
+	DeprecationOptions      internal.DeprecationOptions
+	LogFileMinAge           time.Duration
 	GetTimeout              time.Duration
 	PostTimeout             time.Duration
 }
@@ -91,9 +94,10 @@ func (o *Options) BindFlags(fs *flag.FlagSet) {
 	fs.BoolVar(&o.CompressOldFiles, "compress", false, "Defines whether the rotated log files should be compressed using gzip or not.")
 	fs.BoolVar(&o.PrintVersion, "version", false, "Prints the version of the operator and exits.")
 	fs.StringVar(&o.LabelSelector, "label-selector", "", "Defines a label-selector that will be used to select resources.")
-	fs.StringVar(&o.WatchNamespace, "watch-namespace", os.Getenv("WATCH_NAMESPACE"), "Defines which namespace the operator should watch")
-	fs.DurationVar(&o.GetTimeout, "get-timeout", 5*time.Second, "http timeout for get requests to the FDB sidecar")
-	fs.DurationVar(&o.PostTimeout, "post-timeout", 10*time.Second, "http timeout for post requests to the FDB sidecar")
+	fs.StringVar(&o.WatchNamespace, "watch-namespace", os.Getenv("WATCH_NAMESPACE"), "Defines which namespace the operator should watch.")
+	fs.DurationVar(&o.GetTimeout, "get-timeout", 5*time.Second, "http timeout for get requests to the FDB sidecar.")
+	fs.DurationVar(&o.PostTimeout, "post-timeout", 10*time.Second, "http timeout for post requests to the FDB sidecar.")
+	fs.BoolVar(&o.UseMultipleThreads, "multiple-threads", false, "Sets the number of threads per version to match the \"max-concurrent-reconciles\".")
 }
 
 // StartManager will start the FoundationDB operator manager.
@@ -139,6 +143,13 @@ func StartManager(
 
 	setupLog := logger.WithName("setup")
 	fdbclient.DefaultCLITimeout = operatorOpts.CliTimeout
+
+	if operatorOpts.UseMultipleThreads {
+		err := fdb.Options().SetClientThreadsPerVersion(int64(operatorOpts.MaxConcurrentReconciles))
+		if err != nil {
+			setupLog.Error(err, "could not set clients threads per version.")
+		}
+	}
 
 	options := ctrl.Options{
 		Scheme:             scheme,
