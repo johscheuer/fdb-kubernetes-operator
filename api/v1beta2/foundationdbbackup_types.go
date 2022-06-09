@@ -101,6 +101,10 @@ type FoundationDBBackupSpec struct {
 	// SidecarContainer defines customization for the
 	// foundationdb-kubernetes-sidecar container.
 	SidecarContainer ContainerOverrides `json:"sidecarContainer,omitempty"`
+
+	// DeleteOnRemoval defines if the backup should be deleted if the FoundationDBBackup resource is deleted.
+	// Default: false
+	DeleteOnRemoval *bool `json:"deleteOnRemoval,omitempty"`
 }
 
 // FoundationDBBackupStatus describes the current status of the backup for a cluster.
@@ -200,6 +204,11 @@ type BlobStoreConfiguration struct {
 
 // ShouldRun determines whether a backup should be running.
 func (backup *FoundationDBBackup) ShouldRun() bool {
+	// If the backup resource is deleted the backup should not be running.
+	if !backup.ObjectMeta.DeletionTimestamp.IsZero() && backup.DeleteOnRemoval() {
+		return false
+	}
+
 	return backup.Spec.BackupState == "" || backup.Spec.BackupState == BackupStateRunning || backup.Spec.BackupState == BackupStatePaused
 }
 
@@ -342,4 +351,9 @@ func (configuration *BlobStoreConfiguration) BucketName() string {
 
 func init() {
 	SchemeBuilder.Register(&FoundationDBBackup{}, &FoundationDBBackupList{})
+}
+
+// DeleteOnRemoval returns if the backup should be deleted when the resource is deleted. If not set defaulting to false.
+func (backup *FoundationDBBackup) DeleteOnRemoval() bool {
+	return pointer.BoolDeref(backup.Spec.DeleteOnRemoval, false)
 }

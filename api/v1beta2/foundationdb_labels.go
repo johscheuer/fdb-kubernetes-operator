@@ -72,4 +72,7 @@ const (
 	// FDBLocalityDNSNameKey represents the key in the locality map that holds
 	// the DNS name for the pod.
 	FDBLocalityDNSNameKey = "dns_name"
+
+	// FoundationDBBackupFinalizer represents the finalizer used for Backup resources.
+	FoundationDBBackupFinalizer string = "foundationdbbackups.foundationdb.org/finalizer"
 )

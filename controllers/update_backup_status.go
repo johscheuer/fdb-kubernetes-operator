@@ -22,6 +22,7 @@ package controllers
 
 import (
 	"context"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	"github.com/FoundationDB/fdb-kubernetes-operator/internal"
 	"k8s.io/apimachinery/pkg/api/equality"
@@ -97,6 +98,11 @@ func (s updateBackupStatus) reconcile(ctx context.Context, r *FoundationDBBackup
 	originalStatus := backup.Status.DeepCopy()
 
 	backup.Status = status
+	if !backup.ObjectMeta.DeletionTimestamp.IsZero() {
+		if !controllerutil.ContainsFinalizer(backup, fdbv1beta2.FoundationDBBackupFinalizer) {
+			controllerutil.AddFinalizer(backup, fdbv1beta2.FoundationDBBackupFinalizer)
+		}
+	}
 
 	_, err = backup.CheckReconciliation()
 	if err != nil {

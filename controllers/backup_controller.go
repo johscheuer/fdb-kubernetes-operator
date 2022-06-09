@@ -22,10 +22,8 @@ package controllers
 
 import (
 	"context"
-
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	"github.com/FoundationDB/fdb-kubernetes-operator/pkg/fdbadminclient"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
@@ -33,7 +31,6 @@ import (
 	fdbv1beta2 "github.com/FoundationDB/fdb-kubernetes-operator/api/v1beta2"
 	"github.com/go-logr/logr"
 	appsv1 "k8s.io/api/apps/v1"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -51,6 +48,7 @@ type FoundationDBBackupReconciler struct {
 
 // +kubebuilder:rbac:groups=apps.foundationdb.org,resources=foundationdbbackups,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=apps.foundationdb.org,resources=foundationdbbackups/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=apps.foundationdb.org,resources=foundationdbbackups/finalizers,verbs=update
 // +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups="coordination.k8s.io",resources=leases,verbs=get;list;watch;create;update;patch;delete
 
@@ -59,26 +57,20 @@ func (r *FoundationDBBackupReconciler) Reconcile(ctx context.Context, request ct
 	backup := &fdbv1beta2.FoundationDBBackup{}
 
 	err := r.Get(ctx, request.NamespacedName, backup)
-
+	if err != nil {
+		return ctrl.Result{}, client.IgnoreNotFound(err)
+	}
 	originalGeneration := backup.ObjectMeta.Generation
 
-	if err != nil {
-		if k8serrors.IsNotFound(err) {
-			// Object not found, return.  Created objects are automatically garbage collected.
-			// For additional cleanup logic use finalizers.
-			return ctrl.Result{}, nil
-		}
-		// Error reading the object - requeue the request.
-		return ctrl.Result{}, err
-	}
-
 	backupLog := log.WithValues("namespace", backup.Namespace, "backup", backup.Name)
+	ctx = logr.NewContext(ctx, backupLog)
 
 	subReconcilers := []backupSubReconciler{
 		updateBackupStatus{},
 		updateBackupAgents{},
 		startBackup{},
 		stopBackup{},
+		deleteBackup{},
 		toggleBackupPaused{},
 		modifyBackup{},
 		updateBackupStatus{},

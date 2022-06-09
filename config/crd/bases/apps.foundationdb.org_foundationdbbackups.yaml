@@ -3197,6 +3197,8 @@ spec:
                   type: string
                 maxItems: 100
                 type: array
+              deleteOnRemoval:
+                type: boolean
               mainContainer:
                 properties:
                   enableLivenessProbe:

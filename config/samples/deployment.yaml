@@ -53,6 +53,12 @@ rules:
 - apiGroups:
   - apps.foundationdb.org
   resources:
+  - foundationdbbackups/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - apps.foundationdb.org
+  resources:
   - foundationdbbackups/status
   verbs:
   - get

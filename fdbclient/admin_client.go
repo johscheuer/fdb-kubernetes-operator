@@ -1,5 +1,5 @@
 /*
- * fdbadminclient.go
+ * admin_client.go
  *
  * This source file is part of the FoundationDB open source project
  *
@@ -588,96 +588,6 @@ func (client *cliAdminClient) GetProtocolVersion(version string) (string, error)
 	}
 
 	return protocolVersionMatch[1], nil
-}
-
-// StartBackup starts a new backup.
-func (client *cliAdminClient) StartBackup(url string, snapshotPeriodSeconds int) error {
-	_, err := client.runCommand(cliCommand{
-		binary: "fdbbackup",
-		args: []string{
-			"start",
-			"-d",
-			url,
-			"-s",
-			fmt.Sprintf("%d", snapshotPeriodSeconds),
-			"-z",
-		},
-	})
-	return err
-}
-
-// StopBackup stops a backup.
-func (client *cliAdminClient) StopBackup(_ string) error {
-	_, err := client.runCommand(cliCommand{
-		binary: "fdbbackup",
-		args: []string{
-			"discontinue",
-		},
-	})
-	return err
-}
-
-// PauseBackups pauses the backups.
-func (client *cliAdminClient) PauseBackups() error {
-	_, err := client.runCommand(cliCommand{
-		binary: "fdbbackup",
-		args: []string{
-			"pause",
-		},
-	})
-	return err
-}
-
-// ResumeBackups resumes the backups.
-func (client *cliAdminClient) ResumeBackups() error {
-	_, err := client.runCommand(cliCommand{
-		binary: "fdbbackup",
-		args: []string{
-			"resume",
-		},
-	})
-	return err
-}
-
-// ModifyBackup updates the backup parameters.
-func (client *cliAdminClient) ModifyBackup(snapshotPeriodSeconds int) error {
-	_, err := client.runCommand(cliCommand{
-		binary: "fdbbackup",
-		args: []string{
-			"modify",
-			"-s",
-			fmt.Sprintf("%d", snapshotPeriodSeconds),
-		},
-	})
-	return err
-}
-
-// GetBackupStatus gets the status of the current backup.
-func (client *cliAdminClient) GetBackupStatus() (*fdbv1beta2.FoundationDBLiveBackupStatus, error) {
-	statusString, err := client.runCommand(cliCommand{
-		binary: "fdbbackup",
-		args: []string{
-			"status",
-			"--json",
-		},
-	})
-
-	if err != nil {
-		return nil, err
-	}
-
-	status := &fdbv1beta2.FoundationDBLiveBackupStatus{}
-	statusString, err = internal.RemoveWarningsInJSON(statusString)
-	if err != nil {
-		return nil, err
-	}
-
-	err = json.Unmarshal([]byte(statusString), &status)
-	if err != nil {
-		return nil, err
-	}
-
-	return status, nil
 }
 
 // StartRestore starts a new restore.

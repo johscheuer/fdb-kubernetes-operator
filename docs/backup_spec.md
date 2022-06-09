@@ -91,6 +91,7 @@ FoundationDBBackupSpec describes the desired state of the backup for a cluster.
 | blobStoreConfiguration | This is the configuration of the target blobstore for this backup. | *[BlobStoreConfiguration](#blobstoreconfiguration) | false |
 | mainContainer | MainContainer defines customization for the foundationdb container. | ContainerOverrides | false |
 | sidecarContainer | SidecarContainer defines customization for the foundationdb-kubernetes-sidecar container. | ContainerOverrides | false |
+| deleteOnRemoval | DeleteOnRemoval defines if the backup should be deleted if the FoundationDBBackup resource is deleted. Default: false | *bool | false |
 
 [Back to TOC](#table-of-contents)
 
