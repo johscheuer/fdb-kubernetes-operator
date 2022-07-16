@@ -56,21 +56,34 @@ func (bounceProcesses) reconcile(ctx context.Context, r *FoundationDBClusterReco
 	}
 
 	minimumUptime := math.Inf(1)
-	addressMap := make(map[string][]fdbv1beta2.ProcessAddress, len(status.Cluster.Processes))
-	for _, process := range status.Cluster.Processes {
-		addressMap[process.Locality["instance_id"]] = append(addressMap[process.Locality["instance_id"]], process.Address)
-
-		if process.UptimeSeconds < minimumUptime {
-			minimumUptime = process.UptimeSeconds
-		}
-	}
-
 	processesToBounce := fdbv1beta2.FilterByConditions(cluster.Status.ProcessGroups, map[fdbv1beta2.ProcessGroupConditionType]bool{
 		fdbv1beta2.IncorrectCommandLine: true,
 		fdbv1beta2.IncorrectPodSpec:     false,
 	}, true)
 
 	addresses := make([]fdbv1beta2.ProcessAddress, 0, len(processesToBounce))
+	addressMap := make(map[string][]fdbv1beta2.ProcessAddress, len(status.Cluster.Processes))
+
+	for _, process := range status.Cluster.Processes {
+		addressMap[process.Locality["instance_id"]] = append(addressMap[process.Locality[fdbv1beta2.FDBLocalityInstanceIDKey]], process.Address)
+
+		if process.UptimeSeconds < minimumUptime {
+			minimumUptime = process.UptimeSeconds
+		}
+
+		if len(process.Messages) > 0 && cluster.Spec.DataCenter == process.Locality[fdbv1beta2.FDBLocalityDCIDKey] {
+			for _, message := range process.Messages {
+				// We only want to restart specific message types like StorageServerFailed or DiskError, and we only want
+				// to restart processes if they are in this state for more than 3 hours.
+				if needsRestart(message.Type) && time.Unix(message.Time, 0).After(time.Now().Add(-3*time.Hour)) {
+					logger.Info("found process with message that needs a restart", "processGroupID", process.Locality[fdbv1beta2.FDBLocalityInstanceIDKey], "address", process.Address.String(), "messageType", message.Type, "messageTime", message.Time)
+					addresses = append(addresses, process.Address)
+					break
+				}
+			}
+		}
+	}
+
 	allSynced := true
 	var missingAddress []string
 
@@ -246,4 +259,8 @@ func getAddressesForUpgrade(r *FoundationDBClusterReconciler, adminClient fdbadm
 	}
 
 	return addresses, nil
+}
+
+func needsRestart(messageType string) bool {
+	return messageType == "StorageServerFailed" || messageType == "DiskError"
 }

@@ -105,6 +105,7 @@ var _ = Describe("FoundationDBStatus", func() {
 									Role: "log",
 								},
 							},
+							Messages: []FoundationDBStatusProcessMessage{},
 						},
 						"c813e585043a7ab55a4905f465c4aa52": {
 							Address: ProcessAddress{
@@ -130,6 +131,7 @@ var _ = Describe("FoundationDBStatus", func() {
 									Role: "storage",
 								},
 							},
+							Messages: []FoundationDBStatusProcessMessage{},
 						},
 						"f9efa90fc104f4e277b140baf89aab66": {
 							Address: ProcessAddress{
@@ -155,6 +157,7 @@ var _ = Describe("FoundationDBStatus", func() {
 									Role: "storage",
 								},
 							},
+							Messages: []FoundationDBStatusProcessMessage{},
 						},
 						"5a633d7f4e98a6c938c84b97ec4aedbf": {
 							Address: ProcessAddress{
@@ -180,6 +183,7 @@ var _ = Describe("FoundationDBStatus", func() {
 									Role: "log",
 								},
 							},
+							Messages: []FoundationDBStatusProcessMessage{},
 						},
 						"5c1b68147a0ef34ce005a38245851270": {
 							Address: ProcessAddress{
@@ -205,6 +209,7 @@ var _ = Describe("FoundationDBStatus", func() {
 									Role: "resolver",
 								},
 							},
+							Messages: []FoundationDBStatusProcessMessage{},
 						},
 						"653defde43cf1fdef131e2fb82bd192d": {
 							Address: ProcessAddress{
@@ -239,6 +244,7 @@ var _ = Describe("FoundationDBStatus", func() {
 									Role: "log",
 								},
 							},
+							Messages: []FoundationDBStatusProcessMessage{},
 						},
 						"9c93d3b70118f16c72f7cb3f53e49f4c": {
 							Address: ProcessAddress{
@@ -267,6 +273,7 @@ var _ = Describe("FoundationDBStatus", func() {
 									Role: "storage",
 								},
 							},
+							Messages: []FoundationDBStatusProcessMessage{},
 						},
 					},
 					Data: FoundationDBStatusDataStatistics{
@@ -490,6 +497,7 @@ var _ = Describe("FoundationDBStatus", func() {
 						{Role: "grv_proxy"},
 						{Role: "storage"},
 					},
+					Messages: []FoundationDBStatusProcessMessage{},
 				},
 				"eab0db1aa7aae81a50ca97e9814a1b7d": {
 					Address: ProcessAddress{
@@ -512,6 +520,7 @@ var _ = Describe("FoundationDBStatus", func() {
 						{Role: string(ProcessClassStorage)},
 						{Role: "resolver"},
 					},
+					Messages: []FoundationDBStatusProcessMessage{},
 				},
 				"f483247d4d5f279ef02c549680cbde64": {
 					Address: ProcessAddress{
@@ -534,6 +543,7 @@ var _ = Describe("FoundationDBStatus", func() {
 						{Role: "commit_proxy"},
 						{Role: "storage"},
 					},
+					Messages: []FoundationDBStatusProcessMessage{},
 				},
 				"f6e0f7fd80da429d20329ad95d793ca3": {
 					Address: ProcessAddress{
@@ -556,6 +566,7 @@ var _ = Describe("FoundationDBStatus", func() {
 						{Role: "data_distributor"},
 						{Role: "ratekeeper"},
 					},
+					Messages: []FoundationDBStatusProcessMessage{},
 				},
 				"f75644abdf1b06c803b5c3c124fdd0a0": {
 					Address: ProcessAddress{
@@ -576,6 +587,7 @@ var _ = Describe("FoundationDBStatus", func() {
 					Roles: []FoundationDBStatusProcessRoleInfo{
 						{Role: string(ProcessClassClusterController)},
 					},
+					Messages: []FoundationDBStatusProcessMessage{},
 				},
 				"105bf6c041f8ec315d03e889c2746ecf": {
 					Address: ProcessAddress{
@@ -596,6 +608,7 @@ var _ = Describe("FoundationDBStatus", func() {
 					Roles: []FoundationDBStatusProcessRoleInfo{
 						{Role: "log"},
 					},
+					Messages: []FoundationDBStatusProcessMessage{},
 				},
 				"78c1c84af4481f0df628d40358f0930a": {
 					Address: ProcessAddress{
@@ -616,6 +629,7 @@ var _ = Describe("FoundationDBStatus", func() {
 					Roles: []FoundationDBStatusProcessRoleInfo{
 						{Role: "log"},
 					},
+					Messages: []FoundationDBStatusProcessMessage{},
 				},
 				"83084479b50c9c3a09b0286297be3796": {
 					Address: ProcessAddress{
@@ -636,6 +650,7 @@ var _ = Describe("FoundationDBStatus", func() {
 					Roles: []FoundationDBStatusProcessRoleInfo{
 						{Role: "log"},
 					},
+					Messages: []FoundationDBStatusProcessMessage{},
 				},
 			},
 			Data: FoundationDBStatusDataStatistics{

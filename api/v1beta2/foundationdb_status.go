@@ -126,6 +126,9 @@ type FoundationDBStatusProcessInfo struct {
 
 	// Roles contains a slice of all roles of the process
 	Roles []FoundationDBStatusProcessRoleInfo `json:"roles,omitempty"`
+
+	// Messages contains a slice of messages of the process
+	Messages []FoundationDBStatusProcessMessage `json:"messages,omitempty"`
 }
 
 // FoundationDBStatusProcessRoleInfo contains the minimal information from the process status
@@ -148,6 +151,15 @@ type FoundationDBStatusDataStatistics struct {
 
 	// State provides a summary of the state of data distribution.
 	State FoundationDBStatusDataState `json:"state,omitempty"`
+}
+
+// FoundationDBStatusProcessMessage represents a message in the FoundationDB status for processes. Those normally contain
+// errors like "StorageServerFailed".
+type FoundationDBStatusProcessMessage struct {
+	// Type defines the type of the message like "StorageServerFailed"
+	Type string
+	// Time defines the unix timestamp when the error was noticed
+	Time int64
 }
 
 // FoundationDBStatusDataState provides information about the state of data
