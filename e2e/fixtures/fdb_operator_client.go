@@ -361,7 +361,7 @@ func (factory *Factory) getOperatorConfig(namespace string) *operatorConfig {
 	config.SidecarVersions = append(
 		config.SidecarVersions,
 		getDefaultOperatorSidecarConfig(
-			factory.options.sidecarImage,
+			factory.singleton.sidecarImage,
 			factory.GetFDBVersionAsString(),
 		),
 	)
