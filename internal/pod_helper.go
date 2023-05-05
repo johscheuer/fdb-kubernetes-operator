@@ -26,7 +26,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net"
-	"regexp"
 	"strconv"
 
 	"github.com/go-logr/logr"
@@ -38,8 +37,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
-
-var processGroupIDRegex = regexp.MustCompile(`^([\w-]+)-(\d+)`)
 
 // GetPublicIPsForPod returns the public IPs for a Pod
 func GetPublicIPsForPod(pod *corev1.Pod, log logr.Logger) []string {
@@ -242,16 +239,26 @@ func CreatePodMap(cluster *fdbv1beta2.FoundationDBCluster, pods []*corev1.Pod) m
 
 // ParseProcessGroupID extracts the components of an process group ID.
 func ParseProcessGroupID(id fdbv1beta2.ProcessGroupID) (fdbv1beta2.ProcessClass, int, error) {
-	result := processGroupIDRegex.FindStringSubmatch(string(id))
-	if result == nil {
-		return "", 0, fmt.Errorf("could not parse process group ID %s", id)
+	endIdx := len(id)
+
+	// The format of a process group ID will always be $prefix-$processClass-$idNum.
+	for idx := endIdx - 1; idx >= 0; idx-- {
+		if id[idx] == '-' {
+			// First get the idNum from the last part and parse it to an int.
+			t := string(id[idx+1 : endIdx])
+			q
+			number, err := strconv.Atoi(t)
+			if err != nil {
+				return "", 0, fmt.Errorf("could not parse process group ID %s", id)
+			}
+
+			// The rest of the process group ID will be returned as prefix.
+			return fdbv1beta2.ProcessClass(id[:idx]), number, nil
+		}
 	}
-	prefix := result[1]
-	number, err := strconv.Atoi(result[2])
-	if err != nil {
-		return "", 0, err
-	}
-	return fdbv1beta2.ProcessClass(prefix), number, nil
+
+	// If we haven't found anything return an error too.
+	return "", 0, fmt.Errorf("could not parse process group ID %s", id)
 }
 
 // GetPublicIPSource determines how a Pod has gotten its public IP.

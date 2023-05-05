@@ -68,4 +68,70 @@ var _ = Describe("pod_lifecycle_manager", func() {
 			fdbv1beta2.PodUpdateModeProcessGroup,
 		),
 	)
+
+	Describe("GetProcessGroupIDFromProcessID", func() {
+		It("can parse a process ID", func() {
+			Expect(GetProcessGroupIDFromProcessID("storage-1-1")).To(Equal("storage-1"))
+		})
+		It("can parse a process ID with a prefix", func() {
+			Expect(GetProcessGroupIDFromProcessID("dc1-storage-1-1")).To(Equal("dc1-storage-1"))
+		})
+
+		It("can handle a process group ID with no process number", func() {
+			Expect(GetProcessGroupIDFromProcessID("storage-2")).To(Equal("storage-2"))
+		})
+	})
+
+	Describe("ParseProcessGroupID", func() {
+		Context("with a storage ID", func() {
+			It("can parse the ID", func() {
+				prefix, id, err := ParseProcessGroupID("storage-12")
+				Expect(err).NotTo(HaveOccurred())
+				Expect(prefix).To(Equal(fdbv1beta2.ProcessClassStorage))
+				Expect(id).To(Equal(12))
+			})
+		})
+
+		Context("with a cluster controller ID", func() {
+			It("can parse the ID", func() {
+				prefix, id, err := ParseProcessGroupID("cluster_controller-3")
+				Expect(err).NotTo(HaveOccurred())
+				Expect(prefix).To(Equal(fdbv1beta2.ProcessClassClusterController))
+				Expect(id).To(Equal(3))
+			})
+		})
+
+		Context("with a custom prefix", func() {
+			It("parses the prefix", func() {
+				prefix, id, err := ParseProcessGroupID("dc1-storage-12")
+				Expect(err).NotTo(HaveOccurred())
+				Expect(prefix).To(Equal(fdbv1beta2.ProcessClass("dc1-storage")))
+				Expect(id).To(Equal(12))
+			})
+		})
+
+		Context("with no prefix", func() {
+			It("gives a parsing error", func() {
+				_, _, err := ParseProcessGroupID("6")
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(Equal("could not parse process group ID 6"))
+			})
+		})
+
+		Context("with no numbers", func() {
+			It("gives a parsing error", func() {
+				_, _, err := ParseProcessGroupID("storage")
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(Equal("could not parse process group ID storage"))
+			})
+		})
+
+		Context("with a text suffix", func() {
+			It("gives a parsing error", func() {
+				_, _, err := ParseProcessGroupID("storage-bad")
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(Equal("could not parse process group ID storage-bad"))
+			})
+		})
+	})
 })
