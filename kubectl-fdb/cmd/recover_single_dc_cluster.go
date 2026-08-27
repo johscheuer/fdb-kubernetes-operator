@@ -270,7 +270,11 @@ func RecoverSingleDCCluster(ctx context.Context, opts RecoveryOpts) error {
 		if candidateIdx >= len(candidates) {
 			return fmt.Errorf(
 				"not enough coordinator candidates: need %d more, have %d running and %d candidates",
-				cluster.DesiredCoordinatorCount()-len(newCoordinators), len(newCoordinators), len(candidates),
+				cluster.DesiredCoordinatorCount()-len(
+					newCoordinators,
+				),
+				len(newCoordinators),
+				len(candidates),
 			)
 		}
 		log.Println("Current coordinators:", len(newCoordinators))
