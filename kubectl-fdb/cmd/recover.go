@@ -1,5 +1,5 @@
 /*
- * recover_multi_region_cluster.go
+ * recover.go
  *
  * This source file is part of the FoundationDB open source project
  *
