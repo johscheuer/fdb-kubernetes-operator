@@ -163,7 +163,7 @@ DatabaseInteractionMode defines how the operator should interact with the FDB cl
 
 ## FaultDomain
 
-FaultDomain represents the FaultDomain of a process group
+FaultDomain represents the FaultDomain of a process group. This value is read from the zoneid locality.
 
 [Back to TOC](#table-of-contents)
 
@@ -363,6 +363,12 @@ LogGroup represents a LogGroup used by a FoundationDB process to log trace event
 
 [Back to TOC](#table-of-contents)
 
+## Machine
+
+Machine represents the node (machine) of a process group. This value is read from the machineid locality.
+
+[Back to TOC](#table-of-contents)
+
 ## MaintenanceModeInfo
 
 MaintenanceModeInfo contains information regarding the zone and process groups that are put into maintenance mode by the operator
@@ -436,6 +442,7 @@ ProcessGroupStatus represents the status of a ProcessGroup.
 | exclusionSkipped | ExclusionSkipped determines if exclusion has been skipped for a process, which will allow the process group to be removed without exclusion. | bool | false |
 | processGroupConditions | ProcessGroupConditions represents a list of degraded conditions that the process group is in. | []*[ProcessGroupCondition](#processgroupcondition) | false |
 | faultDomain | FaultDomain represents the last seen fault domain from the cluster status. This can be used if a Pod or process is not running and would be missing in the cluster status. | [FaultDomain](#faultdomain) | false |
+| machine | Machine represents the last seen machine from the cluster status. This can be used if a Pod or process is not running and would be missing in the cluster status. The information is gathered from the locality information. | [Machine](#machine) | false |
 
 [Back to TOC](#table-of-contents)
 
