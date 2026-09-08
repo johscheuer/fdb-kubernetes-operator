@@ -843,8 +843,11 @@ func (fdbCluster *FdbCluster) SetPodsAsUnschedulable(ctx context.Context, pods [
 		unschedulableProcessGroups,
 	)
 
-	// context aware.
-	time.Sleep(5 * time.Second)
+	select {
+	case <-ctx.Done():
+		return
+	case <-time.After(5 * time.Second):
+	}
 
 	for _, pod := range pods {
 		fetchedPod := &corev1.Pod{}
@@ -853,8 +856,6 @@ func (fdbCluster *FdbCluster) SetPodsAsUnschedulable(ctx context.Context, pods [
 		if err != nil {
 			continue
 		}
-		// check if error is absent -> case not created, just deleted
-		gomega.Expect(err).NotTo(gomega.HaveOccurred())
 
 		// Try deleting the Pod as a workaround until the operator handles all cases.
 		if fetchedPod.Spec.NodeName != "" && fetchedPod.DeletionTimestamp.IsZero() {

@@ -84,7 +84,7 @@ func newRecoverSingleDCClusterCmd(streams genericiooptions.IOStreams) *cobra.Com
 			if wait {
 				confirmed := confirmAction(
 					fmt.Sprintf(
-						"WARNING:\nThe cluster: %s/%s will be force recovered.\nOnly perform those steps if you are unable to recover the coordinator pods.\nPerforming this action could lead to data loss.\n At leas one coordinator must be active and running to copy the coordinator state.\n",
+						"WARNING:\nThe cluster: %s/%s will be force recovered.\nOnly perform those steps if you are unable to recover the coordinator pods.\nPerforming this action could lead to data loss.\n At least one coordinator must be active and running to copy the coordinator state.\n",
 						namespace,
 						clusterName,
 					),

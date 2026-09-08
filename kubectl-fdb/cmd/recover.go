@@ -27,7 +27,6 @@ import (
 	"log"
 	"os"
 	"path"
-	"strings"
 	"time"
 
 	fdbv1beta2 "github.com/FoundationDB/fdb-kubernetes-operator/v2/api/v1beta2"
@@ -321,6 +320,9 @@ func restartFdbserverInCluster(
 	return nil
 }
 
+// checkIfClusterIsUnavailableAndMajorityOfCoordinatorsAreUnreachable checks if the majority of the coordinators are
+// unreachable and if the cluster is unavailable. This is a safeguard to reduce the risk of running the recovery
+// commands against a healthy cluster.
 func checkIfClusterIsUnavailableAndMajorityOfCoordinatorsAreUnreachable(
 	ctx context.Context,
 	kubeClient client.Client,
@@ -344,15 +346,11 @@ func checkIfClusterIsUnavailableAndMajorityOfCoordinatorsAreUnreachable(
 			break
 		}
 
-		time.Sleep(5 * time.Second)
-	}
-
-	// If DNS is used for the cluster file, we could hit cases where no DNS entry can be resolved, in this case we could
-	// assume that the cluster is also down. The error from the client side is the following:
-	//  Error: error getting status: Error determining public address.
-	//  ERROR: Unable to bind to network (1512)
-	if err != nil && strings.Contains(err.Error(), "Error determining public address") {
-		return err
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-time.After(5 * time.Second):
+		}
 	}
 
 	return err
